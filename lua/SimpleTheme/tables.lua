@@ -3,7 +3,7 @@ M = {}
 Hl = require('SimpleTheme.hl')
 
 ---@param t table<string, vim.api.keyset.highlight>
----@return table<string, Highlight>
+---@return table<string, SimpleTheme.Highlight>
 local function convert(t)
     local out = {}
     for k, v in pairs(t) do
@@ -14,7 +14,7 @@ end
 
 ---@param types table<SimpleTheme.Types, vim.api.keyset.highlight>,
 ---@param mods table<SimpleTheme.Mod, vim.api.keyset.highlight>,
----@return table<string, Highlight>
+---@return table<string, SimpleTheme.Highlight>
 function M.semantic_tokens(types, mods)
     local t = convert(types)
     local m = convert(mods)
@@ -59,7 +59,7 @@ end
 
 ---@param types table<SimpleTheme.Types, vim.api.keyset.highlight>,
 ---@param mods table<SimpleTheme.Mod, vim.api.keyset.highlight>,
----@return table<string, Highlight>
+---@return table<string, SimpleTheme.Highlight>
 function M.treesitter(types, mods)
     local t = convert(types)
     local m = convert(mods)
@@ -124,7 +124,7 @@ function M.treesitter(types, mods)
         ['@comment.documentation'] = t.Comment,
         ['@comment.error'       ] = t.Comment,
         ['@comment.warning'     ] = t.Comment,
-        ['@comment.todo'        ] = t.Comment,
+        ['@comment.todo'        ] = t.Comment + m.Abstract,
         ['@comment.note'        ] = t.Comment,
         -- ['@markup.strong'       ] =,
         -- ['@markup.italic'       ] =,
@@ -159,7 +159,7 @@ end
 
 ---@param types table<SimpleTheme.Types, vim.api.keyset.highlight>,
 ---@param mods table<SimpleTheme.Mod, vim.api.keyset.highlight>,
----@return table<string, Highlight>
+---@return table<string, SimpleTheme.Highlight>
 function M.legacy(types, mods)
     local t = convert(types)
     local m = convert(mods)
@@ -200,7 +200,7 @@ function M.legacy(types, mods)
         -- SpecialChar =,
         -- Tag         =,
         Delimiter   = t.Default,
-        SpecialComment = t.Comment, --TODO: Improve
+        SpecialComment = t.Comment + m.Important,
         -- Debug =,
 
         -- Underlined=,

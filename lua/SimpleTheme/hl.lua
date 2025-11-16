@@ -1,17 +1,17 @@
----@class Highlight
+---@class SimpleTheme.Highlight
 local M = {}
 M.__index = M
 
 ---@param tbl vim.api.keyset.highlight
----@return Highlight
+---@return SimpleTheme.Highlight
 function M.new(tbl)
     local hl = setmetatable(tbl or {}, M)
-    ---@cast hl Highlight
+    ---@cast hl SimpleTheme.Highlight
     return hl
 end
 
----@param other Highlight
----@return Highlight
+---@param other SimpleTheme.Highlight
+---@return SimpleTheme.Highlight
 function M:__add(other)
     local out = {}
 

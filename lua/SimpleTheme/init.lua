@@ -21,15 +21,16 @@ M.Mod = {
     Async       = 'Async',
     Deprecated  = 'Deprecated',
     Constant    = 'Constant',
+    Important   = 'Important',
 }
 
----@alias Opts {
+---@alias SimpleTheme.Opts {
     ---['types']: table<SimpleTheme.Types, vim.api.keyset.highlight>,
     ---['modifiers']: table<SimpleTheme.Mod, vim.api.keyset.highlight>,
 ---}
 local default_opts = {
     types = {
-        Default  = { fg = '#ffffff'},
+        Default  = { fg = '#ffffff' },
         Comment = { fg = '#cccccc' },
 
         Number   = { fg = '#80b3ff' },
@@ -47,16 +48,18 @@ local default_opts = {
         Async = { reverse = true },
         Deprecated = { strikethrough = true },
         Constant = { italic = true },
+        Important = { bold = true },
     }
 }
 
----@param hl table<string, Highlight>
+---@param hl table<string, SimpleTheme.Highlight>
 local function set_hl(hl)
     for category, format in pairs(hl) do
         vim.api.nvim_set_hl(0, category, format:unwrap())
     end
 end
 
+---@param opts SimpleTheme.Opts
 function M.setup(opts)
     M.opts = vim.tbl_deep_extend('force', default_opts, opts or {})
     local types = M.opts.types
