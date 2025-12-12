@@ -5,9 +5,9 @@
 More than a theme it's an "Engine" to make your own theme. Inspired in LSP
 Semantic Tokens, but simplified.
 
-There's still work to do. By now it only supports highlighting, we aren't even
-defing background color or anything. But here's an example of the basic config
-to get started.
+There's still work to do. By now it only supports highlighting, there are
+little quirks with the background color of certain tokens. But here's an
+example of the basic config to get started.
 
 Here's the Lazy plugin spec:
 ```lua
@@ -21,35 +21,32 @@ return {
 
 Ain't that easy? But well, you would like to use your own colors. The default
 colors are, with a twist, quite _vscode inspired_, so here's how you configure
-your own colors:
+your own colors.
 
 ## Configuration
 
 This is part of the source code:
 ```lua
----@enum SimpleTheme.Types
-M.Types = {
-    Default  = 'Default',
-    Comment  = 'Comment',
+---@alias SimpleTheme.enum.Types
+---|'Default'
+---|'Comment'
+---
+---|'Number'
+---|'String'
+---|'Variable'
+---
+---|'Function'
+---|'Macro'
+---|'Type'
+---|'Keyword'
 
-    Number   = 'Number',
-    String   = 'String',
-    Variable = 'Variable',
+---@alias SimpleTheme.enum.Mod
+---|'Abstract'
+---|'Async'
+---|'Deprecated'
+---|'Constant'
+---|'Important'
 
-    Function = 'Function',
-    Macro    = 'Macro',
-    Type     = 'Type',
-    Keyword  = 'Keyword',
-}
-
----@enum SimpleTheme.Mod
-M.Mod = {
-    Abstract    = 'Abstract',
-    Async       = 'Async',
-    Deprecated  = 'Deprecated',
-    Constant    = 'Constant',
-    Important   = 'Important',
-}
 ```
 
 Those are the two categories the opts can be defined. So in your spec, you can
@@ -61,9 +58,10 @@ return {
     priority = 1000,
     lazy = false,
     opts = {
+        base = { fg = '#1a334e', bg = '#ffffff' },
         types = {
             Function = { bg = '#000000' }
-            Macro = { fg = '#ff0000', strikethrough = true }
+            Macro = { fg = '#ff0000', italic = true }
         },
         modifiers = {
             Important = { underline = true }

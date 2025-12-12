@@ -1,75 +1,116 @@
-M = {}
+local tables = require('SimpleTheme.tables')
 
----@enum SimpleTheme.Types
-M.Types = {
-    Default  = 'Default',
-    Comment  = 'Comment',
+M = { opts = {} }
 
-    Number   = 'Number',
-    String   = 'String',
-    Variable = 'Variable',
+---@alias SimpleTheme.enum.Types
+---|'Normal'
+---|'Comment'
+---
+---|'Number'
+---|'String'
+---|'Variable'
+---
+---|'Function'
+---|'Macro'
+---|'Type'
+---|'Keyword'
 
-    Function = 'Function',
-    Macro    = 'Macro',
-    Type     = 'Type',
-    Keyword  = 'Keyword',
-}
+---@alias SimpleTheme.enum.Mod
+---|'Abstract'
+---|'Async'
+---|'Deprecated'
+---|'Constant'
+---|'Important'
 
----@enum SimpleTheme.Mod
-M.Mod = {
-    Abstract    = 'Abstract',
-    Async       = 'Async',
-    Deprecated  = 'Deprecated',
-    Constant    = 'Constant',
-    Important   = 'Important',
-}
+---@alias SimpleTheme.enum.Table SimpleTheme.enum.Types | SimpleTheme.enum.Mod
+
+---@alias SimpleTheme.enum.Opts
+---|'base'
+---|'types'
+---|'modifiers'
+---|'terminal'
+
+---@alias SimpleTheme.enum.Opts.base 'base'
+---@alias SimpleTheme.enum.Opts.types 'types'
+---@alias SimpleTheme.enum.Opts.modifiers 'modifiers'
+---@alias SimpleTheme.enum.Opts.terminal 'terminal'
 
 ---@alias SimpleTheme.Opts {
-    ---['types']: table<SimpleTheme.Types, vim.api.keyset.highlight>,
-    ---['modifiers']: table<SimpleTheme.Mod, vim.api.keyset.highlight>,
+    ---[SimpleTheme.enum.Opts.base]: vim.api.keyset.highlight,
+    ---[SimpleTheme.enum.Opts.terminal]: boolean,
+    ---[SimpleTheme.enum.Opts.types]: table<SimpleTheme.enum.Types, vim.api.keyset.highlight>,
+    ---[SimpleTheme.enum.Opts.modifiers]: table<SimpleTheme.enum.Mod, vim.api.keyset.highlight>,
 ---}
-local default_opts = {
-    types = {
-        Default  = { fg = '#ffffff' },
-        Comment = { fg = '#cccccc' },
 
-        Number   = { fg = '#80b3ff' },
-        String   = { fg = '#ff6666' },
-        Variable = { fg = '#99ccff' },
+---@return SimpleTheme.Opts
+local function default_opts()
+    return {
+        base  = { fg = '#ffffff', bg = '#081800' },
+        terminal = false, --still not implemented
+        types = {
+            Normal   = {},
+            Comment  = { fg = '#b3b3b3' },
 
-        Function = { fg = '#e6ff33' },
-        Macro    = { fg = '#ff00ff' },
-        Type     = { fg = '#33b333', italic = true, bold = true },
-        Keyword = { fg = '#ff0000', bold = true },
-    },
-    modifiers = {
-        NoMod = {},
-        Abstract = { reverse = true },
-        Async = { reverse = true },
-        Deprecated = { strikethrough = true },
-        Constant = { italic = true },
-        Important = { bold = true },
+            Number   = { fg = '#4d66ff' },
+            String   = { fg = '#ff6666' },
+            Variable = { fg = '#99ccff' },
+
+            Function = { fg = '#e6ff33' },
+            Macro    = { fg = '#ff00ff' },
+            Type     = { fg = '#4db34d' },
+            Keyword  = { fg = '#006600' },
+        },
+        modifiers = {
+            Abstract   = { reverse = true, },
+            Async      = { italic = true }, --2-@type vim.api.keyset.highlight
+            Deprecated = { strikethrough = true },
+            Constant   = { italic = true },
+            Important  = { bold = true },
+        }
     }
-}
+end
 
----@param hl table<string, SimpleTheme.Highlight>
+---@param hl table<SimpleTheme.enum.Table, vim.api.keyset.highlight>
 local function set_hl(hl)
     for category, format in pairs(hl) do
-        vim.api.nvim_set_hl(0, category, format:unwrap())
+        vim.api.nvim_set_hl(0, category, format)
     end
+end
+--- For this I think it's better to substitute keys rather than combining
+--- tables with vim.tbl_deep_extend
+---@param default SimpleTheme.Opts
+---@param opts SimpleTheme.Opts
+---@param key SimpleTheme.enum.Opts
+---@return SimpleTheme.Opts
+local function combine(default, opts, key)
+    local config = opts[key]
+    local out = default[key]
+
+    if config == nil then return out end
+
+    for k, v in pairs(config) do
+        out[k] = v
+    end
+
+    return out
 end
 
 ---@param opts SimpleTheme.Opts
 function M.setup(opts)
-    M.opts = vim.tbl_deep_extend('force', default_opts, opts or {})
-    local types = M.opts.types
-    local mods = M.opts.modifiers
+    opts = opts or {}
+    local default = default_opts()
 
-    local tables = require('SimpleTheme.tables')
+    M.opts.types = combine(default, opts, 'types')
+    M.opts.modifiers = combine(default, opts, 'modifiers')
+    M.opts.base = opts.base or default.base
 
-    set_hl(tables.legacy(types, mods))
-    set_hl(tables.treesitter(types, mods))
-    set_hl(tables.semantic_tokens(types, mods))
+    vim.cmd.highlight('clear')
+    vim.g.colors_name = 'SimpleTheme'
+    vim.api.nvim_set_hl(0, 'Normal', M.opts.base)
+
+    set_hl(tables.legacy(M.opts))
+    set_hl(tables.treesitter(M.opts))
+    set_hl(tables.semantic_tokens(M.opts))
 end
 
 return M
